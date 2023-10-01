@@ -1,0 +1,23 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "employee tracker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Reibean/Employee-Tracker.git"
+  },
+  "author": "Reiley",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Reibean/Employee-Tracker/issues"
+  },
+  "homepage": "https://github.com/Reibean/Employee-Tracker#readme",
+  "dependencies": {
+    "inquirer": "^9.2.11",
+    "mysql2": "^3.6.1"
+  }
+}
