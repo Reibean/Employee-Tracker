@@ -1,6 +1,7 @@
 {
   "name": "employee-tracker",
   "version": "1.0.0",
+  "type": "module",
   "description": "employee tracker",
   "main": "index.js",
   "scripts": {

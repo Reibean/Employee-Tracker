@@ -1,10 +1,44 @@
-const inquirer = require('inquirer');
-const db = require('./db');
-const { parse } = require('dotenv');
+import inquirer from "inquirer";
+import mysql from "mysql2";
+import fs from "fs";
+
+const db = mysql.createConnection({
+    host: '127.0.0.1',
+    user: 'root',
+    password: 'Aerius<3!',
+    database: 'employees_db',
+});
+
+fs.readFile('db/schema.sql', 'utf8', (err, data) => {
+    if (err) {
+        console.error('Error reading schema.sql:', err);
+        process.exit(1);
+    }
+
+db.connect((err) => {
+    if (err) {
+        console.error('Error conneccting to MySQL:', err);
+        process.exit(1);
+    } 
+
+    db.query(data, (err, results) => {
+        if (err) {
+            console.error('Error executing schema.sql:', err);
+            process.exit(1);
+        }
+
+        console.log('Database and tables created.');
+
+        db.end();
+        console.log('Connected to MySQL database');
+        });
+    });
+});
+
 
 function menu() {
     inquirer
-    .createPromptModule({
+    .prompt({
         name: 'action',
         type: 'list',
         message: 'What would you like to do?',
