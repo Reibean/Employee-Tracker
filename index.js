@@ -1,25 +1,27 @@
 import inquirer from "inquirer";
 import mysql from "mysql2";
 import fs from "fs";
+import { resolve } from "path";
 
 const db = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
     password: 'Aerius<3!',
-    database: 'employees_db',
 });
+
+const createDatabaseSQL = 'CREATE DATABASE IF NOT EXISTS employees_db';
+
+db.query(createDatabaseSQL, (err) => {
+    if (err) {
+        console.error('Error creating the database:', err);
+        process.exit(1);
+    }
 
 fs.readFile('db/schema.sql', 'utf8', (err, data) => {
     if (err) {
         console.error('Error reading schema.sql:', err);
         process.exit(1);
     }
-
-db.connect((err) => {
-    if (err) {
-        console.error('Error conneccting to MySQL:', err);
-        process.exit(1);
-    } 
 
     db.query(data, (err, results) => {
         if (err) {
@@ -50,7 +52,7 @@ function menu() {
             'Add a role',
             'Add an employee',
             'Update an employee role',
-            'Exit',
+            'Exit'
         ],
     })
     .then((answer) => {
@@ -86,7 +88,6 @@ function menu() {
             case 'Exit':
                 db.end();
                 console.log('Goodbye!');
-                process.exit(0);
             
             default:
                 console.log('Invalid choice');
@@ -98,18 +99,27 @@ function menu() {
 function viewAllDepartments() {
     const query = 'SELECT * FROM departments';
 
+    return new Promise((resolve, reject) => {
     db.query(query, (err, results) => {
         if (err) {
-            console.error('Error retrieving departments:', err);
+            reject(err);
             return;
         }
+        resolve(results);
+        });
+    })
+    .then((results) => {
         console.log('All Departments:');
         for (const department of results) {
-            console.log('ID: ${department.id | Name:${department.name}');
+            console.log(`ID: ${department.id} | Name:${department.name}`);
         }
-
-        menu();
     })
+    .catch((err) => {
+        console.error('Error retrieving departments:', err);
+    })
+    .finally(() => {
+        menu();
+    });
 }
 
 function viewAllRoles() {
@@ -121,8 +131,8 @@ function viewAllRoles() {
             return;
         }
         console.log('All Roles:');
-        for (const roles of results) {
-            console.log('ID: ${role.id | Name:${role.name}');
+        for (const role of results) {
+            console.log(`ID: '${role.id}' | Name:${role.name}`);
         }
 
         menu();
@@ -138,8 +148,8 @@ function viewAllRoles() {
                 return;
             }
             console.log('All Employees:');
-            for (const roles of results) {
-                console.log('ID: ${employee.id | Name:${employee.name}');
+            for (const employee of results) {
+                console.log(`ID: ${employee.id} | Name: ${employee.name}`);
             }
     
             menu();
@@ -265,7 +275,68 @@ function viewAllRoles() {
     }
 
     function updateEmployeeRole() {
+        const employeeQuery = 'SELECT id, first_name, last_name FROM employees';
+        const roleQuery = 'SELECT id, title FROM roles';
 
-    }
+        inquirer
+        .prompt([
+            {
+                name: 'employeeId',
+                type: 'list',
+                message: 'Select the employee to update their role:',
+                choices: function () {
+                    return new Promise((resolve, reject) => {
+                        db.query(employeeQuery, (err, results) => {
+                            if (err) {
+                                reject(err);
+                                return;
+                            }
 
-menu();
+                            const choices = results.map((employee) => ({
+                                name: `${employee.first_name} ${employee.last_name}`,
+                                value: employee.id,
+                            }));
+                            resolve(choices);
+                        });
+                    });
+                },
+            },
+        {
+            name: 'roleId',
+            type: 'list',
+            message: 'Select the new role for the employee:',
+            choices: function () {
+                return new Promise((resolve, reject) => {
+                    db.query(roleQuery, (err, results) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+
+                        const choices = results.map((role) => ({
+                            name: role.title,
+                            value: role.id,
+                        }));
+                        resolve(choices);
+                    });
+                });
+            },
+        },
+        ])
+        .then((answers) => {
+            const updateQuery = 'UPDATE employees SET role_id = ? WHERE id = ?';
+            const values = [answers.roleId, answers.employeeId];
+
+            db.query(updateQuery, values, (err, result) => {
+                if (err) {
+                    console.error('Error updating employee role:', err);
+                } else {
+                    console.log('Employee role updated successfully.');
+                }
+
+                menu();
+            });
+        });
+        };
+
+// menu();
