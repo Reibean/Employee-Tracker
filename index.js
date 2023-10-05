@@ -1,42 +1,11 @@
 import inquirer from "inquirer";
 import mysql from "mysql2";
-import fs from "fs";
-import { resolve } from "path";
 
 const db = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
     password: 'Aerius<3!',
 });
-
-const createDatabaseSQL = 'CREATE DATABASE IF NOT EXISTS employees_db';
-
-db.query(createDatabaseSQL, (err) => {
-    if (err) {
-        console.error('Error creating the database:', err);
-        process.exit(1);
-    }
-
-fs.readFile('db/schema.sql', 'utf8', (err, data) => {
-    if (err) {
-        console.error('Error reading schema.sql:', err);
-        process.exit(1);
-    }
-
-    db.query(data, (err, results) => {
-        if (err) {
-            console.error('Error executing schema.sql:', err);
-            process.exit(1);
-        }
-
-        console.log('Database and tables created.');
-
-        db.end();
-        console.log('Connected to MySQL database');
-        });
-    });
-});
-
 
 function menu() {
     inquirer
@@ -97,83 +66,48 @@ function menu() {
 }
 
 function viewAllDepartments() {
-    const query = 'SELECT * FROM departments';
-
-    return new Promise((resolve, reject) => {
-    db.query(query, (err, results) => {
-        if (err) {
-            reject(err);
-            return;
-        }
-        resolve(results);
-        });
-    })
-    .then((results) => {
-        console.log('All Departments:');
-        for (const department of results) {
-            console.log(`ID: ${department.id} | Name:${department.name}`);
-        }
-    })
-    .catch((err) => {
-        console.error('Error retrieving departments:', err);
-    })
-    .finally(() => {
+    db.query = ('SELECT * FROM departments', function (err, results) {
+        if (err) throw err;
+        console.table(results);
         menu();
     });
 }
 
 function viewAllRoles() {
-    const query = 'SELECT * FROM roles';
-
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error retrieving roles:', err);
-            return;
-        }
-        console.log('All Roles:');
-        for (const role of results) {
-            console.log(`ID: '${role.id}' | Name:${role.name}`);
-        }
-
+    db.query = ('SELECT * FROM roles', function (err, results) {
+        if (err) throw err;
+        console.table(results);
         menu();
-        })
-    }
+    });
+}
+
 
     function viewAllEmployees() {
-        const query = 'SELECT * FROM employees';
-    
-        db.query(query, (err, results) => {
-            if (err) {
-                console.error('Error retrieving employees:', err);
-                return;
-            }
-            console.log('All Employees:');
-            for (const employee of results) {
-                console.log(`ID: ${employee.id} | Name: ${employee.name}`);
-            }
-    
+        db.query = ('SELECT * FROM employees', function (err, results) {
+            if (err) throw err;
+            console.table(results);
             menu();
-            })
-        }
+        });
+    }
+    
 
     function addDepartment() {
         inquirer
-            .createPromptModule({
+            .prompt({
                 name: 'name',
                 type: 'input',
                 message: 'Enter the name of the new department:',            
             })
             .then((answer) => {
-                const query = 'INSERT INTO departments (name) VALUES (?)';
+                const query = `INSERT INTO departments (name) VALUES (?)`;
                 const values = [answer.name];
 
-                db.query(query, values, (err, results) => {
+                db.query(query, values, function (err, results) {
                     if (err) {
                         console.error('Error adding department:', err);
                     } else {
                         console.log(`New department '${answer.name}' added successfully.`);
                     }
-
                     menu();
                 });
             });
@@ -183,7 +117,7 @@ function viewAllRoles() {
         inquirer
             .prompt([
                 {
-                    name: 'title',
+                    name: 'Roles',
                     type: 'input',
                     message: 'Enter the title of the new role:',
                 },
@@ -196,14 +130,24 @@ function viewAllRoles() {
                     },
                 },
                 {
-                    name: 'department_id',
-                    type: 'input',
-                    message: 'Enter the department ID for the new role:',
-                    validate: (input) => {
-                        return !isNaN(input) && input > 0 && Number.isInteger(parseFloat(input)); 
-                    },
+                    name: 'roleList',
+                    type: 'list',
+                    message: 'Department of Role?',
+                    choices: [
+                        'Sales Manager',
+                        'Sales Rep',
+                        'Marketing Manager',
+                        'Marketing Specialist',
+                        'Software Engineer',
+                        'Web Developer',
+                        'Financial Analyst',
+                        'Accountant', 
+                    ]
+
+
                 },
             ])
+
             .then((answers) => {
                 const query = 'INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)';
                 const values = [answers.title, parseFloat(answers.salary), parseInt(answers.department_id)];
