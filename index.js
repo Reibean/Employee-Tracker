@@ -1,9 +1,11 @@
-import inquirer from "inquirer";
-import mysql from "mysql2";
+import mysql from 'mysql2';
+import inquirer from 'inquirer';
+import { query } from 'express';
 
 const db = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
+    database: 'employees_db',
     password: 'Aerius<3!',
 });
 
@@ -66,7 +68,8 @@ function menu() {
 }
 
 function viewAllDepartments() {
-    db.query = ('SELECT * FROM departments', function (err, results) {
+    const query = 'SELECT * FROM departments';
+    db.query(query, function (err, results) {
         if (err) throw err;
         console.table(results);
         menu();
@@ -74,7 +77,8 @@ function viewAllDepartments() {
 }
 
 function viewAllRoles() {
-    db.query = ('SELECT * FROM roles', function (err, results) {
+    const query = 'SELECT * FROM roles';
+    db.query(query, function (err, results) {
         if (err) throw err;
         console.table(results);
         menu();
@@ -82,13 +86,14 @@ function viewAllRoles() {
 }
 
 
-    function viewAllEmployees() {
-        db.query = ('SELECT * FROM employees', function (err, results) {
-            if (err) throw err;
-            console.table(results);
-            menu();
-        });
-    }
+function viewAllEmployees() {
+    const query = 'SELECT * FROM employees';
+    db.query(query, function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        menu();
+    });
+}
     
 
     function addDepartment() {
@@ -283,4 +288,4 @@ function viewAllRoles() {
         });
         };
 
-// menu();
+menu();

@@ -6,7 +6,6 @@ SELECT
     departments.name,
     roles.salary,
     employees.manager_id,
-    manager.name
 FROM employees
 JOIN roles ON employees.role_id = roles.id
 JOIN departments ON roles.department_id = departments.id
