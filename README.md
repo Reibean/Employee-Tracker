@@ -17,7 +17,9 @@ To install this app, you will need to run "npm i" in your terminal to install al
 
 ## Usage
 
-To run the app, type "node index.js" into your command line and cycle through the menu using your arrow keys. Upon menu selection you should be able to view employees, their jobs, and all of the deparmtents. 
+To run the app, type "node index.js" into your command line and cycle through the menu using your arrow keys. Upon menu selection you should be able to view employees, their jobs, and all of the deparmtents. *Refer to video linked for usage*
+https://drive.google.com/file/d/1OV0RhJLKQlzz8rQB9mkukTJIVGCC3Nb1/view
+ 
 
 ## Contributing
 
